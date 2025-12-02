@@ -162,8 +162,10 @@ function App() {
     []
   )
 
-  const [data, _setData] = React.useState(() => makeData(1000))
+  const [data, _setData] = React.useState(() => makeData(10))
   const [density, setDensity] = React.useState<DensityState>('md')
+  const [newlyAddedRows, setNewlyAddedRows] = React.useState<Set<string>>(new Set())
+  const [fadingRows, setFadingRows] = React.useState<Set<string>>(new Set())
 
   const table = useReactTable({
     _features: [DensityFeature], //pass our custom feature to the table to be instantiated upon creation
@@ -180,10 +182,33 @@ function App() {
     onDensityChange: setDensity, //using the new onDensityChange option, TS is still happy :)
     meta: {
       prepend: () => {
+        const newRowId = `new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const newPerson: Person = {
-          ...makeOnePerson()
+          ...makeOnePerson(),
+          // Add a unique identifier for tracking
+          id: newRowId
         };
         _setData((old)=>[newPerson, ...old]);
+        
+        // Track the newly added row
+        setNewlyAddedRows(prev => new Set(prev).add(newRowId));
+        
+        // Remove highlight after 3 seconds
+        setTimeout(() => {
+          setFadingRows(prev => new Set(prev).add(newRowId));
+          setTimeout(() => {
+            setNewlyAddedRows(prev => {
+              const updated = new Set(prev);
+              updated.delete(newRowId);
+              return updated;
+            });
+            setFadingRows(prev => {
+              const updated = new Set(prev);
+              updated.delete(newRowId);
+              return updated;
+            });
+          }, 1000); // Allow 1 second for fade out animation
+        }, 3000); // Highlight for 3 seconds
       }
     }
   });
@@ -253,8 +278,15 @@ function App() {
         </thead>
         <tbody>
           {table.getRowModel().rows.map(row => {
+            const person = row.original as Person;
+            const isNewlyAdded = person.id && newlyAddedRows.has(person.id);
+            const isFading = person.id && fadingRows.has(person.id);
+            const rowClassName = isNewlyAdded 
+              ? (isFading ? 'row-highlight-fade-out' : 'row-highlight')
+              : '';
+            
             return (
-              <tr key={row.id}>
+              <tr key={row.id} className={rowClassName}>
                 {row.getVisibleCells().map(cell => {
                   return (
                     <td
