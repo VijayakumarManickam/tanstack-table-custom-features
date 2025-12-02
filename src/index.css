@@ -32,3 +32,49 @@ tr {
 button:disabled {
   opacity: 0.5;
 }
+
+/* Highlight styles for newly added rows */
+.row-highlight {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  animation: fadeIn 0.5s ease-in-out, pulse 1.5s ease-in-out;
+}
+
+.row-highlight-fade-out {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  animation: fadeOut 1s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    background-color: #fbbf24;
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: #fef3c7;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    background-color: #fef3c7;
+    border-left-color: #f59e0b;
+    opacity: 1;
+  }
+  100% {
+    background-color: transparent;
+    border-left-color: transparent;
+    opacity: 1;
+  }
+}
